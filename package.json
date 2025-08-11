@@ -1,0 +1,55 @@
+{
+  "name": "psg-compass",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PSG Compass - A Comprehensive Pedal Steel Guitar Music Application",
+  "author": "Rodrigo de la Mora",
+  "homepage": "./",
+  "dependencies": {
+    "@tauri-apps/api": "^1.5.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "react-slider": "^2.0.6",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "session-update": "node session-update.js",
+    "session-complete": "npm run session-update",
+    "context-update": "node session-update.js",
+    "dev-complete": "npm run session-update && echo '✅ Session completed and documented!'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0"
+  }
+}

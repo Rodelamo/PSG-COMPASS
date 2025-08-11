@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSG Compass - Copedent Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fieldset { border: 1px solid #E5E7EB; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
+        .legend { font-weight: 600; padding: 0 0.5rem; font-size: 1.125rem; color: #374151; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.375rem; color: white; cursor: pointer; transition: background-color 0.2s; font-weight: 500; border: none; }
+        .btn-blue { background-color: #3B82F6; } .btn-blue:hover { background-color: #2563EB; }
+        .btn-red { background-color: #EF4444; } .btn-red:hover { background-color: #DC2626; }
+        .btn-green { background-color: #22C55E; } .btn-green:hover { background-color: #16A34A; }
+        .btn-orange { background-color: #F97316; } .btn-orange:hover { background-color: #EA580C; }
+        .btn-gray { background-color: #6B7280; } .btn-gray:hover { background-color: #4B5563; }
+        .btn-purple { background-color: #8B5CF6; } .btn-purple:hover { background-color: #7C3AED; }
+        #output-code { white-space: pre; background-color: #1F2937; color: #F9FAFB; padding: 1rem; border-radius: 0.5rem; font-family: 'Courier New', Courier, monospace; overflow-x: auto; font-size: 12px; }
+        #array-code { white-space: pre; background-color: #1F2937; color: #F9FAFB; padding: 1rem; border-radius: 0.5rem; font-family: 'Courier New', Courier, monospace; overflow-x: auto; font-size: 12px; }
+        .hidden { display: none; }
+        .page { animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .note-arrows { user-select: none; }
+        .define-option { color: #EF4444; font-weight: bold; }
+        .split-mec { background-color: #EFF6FF; }
+        .table-cell { min-width: 80px; }
+        .sticky-col { position: sticky; background: white; z-index: 10; }
+        .sticky-header { position: sticky; top: 0; background: #F9FAFB; z-index: 20; }
+        .note-result { font-size: 11px; color: #6B7280; margin-top: 2px; }
+        .control-input { width: 60px; text-align: center; }
+        .lever-toggle-container { display: flex; flex-direction: column; align-items: center; padding: 8px; }
+        .split-define { border: 2px solid #EF4444 !important; background: #FEF2F2 !important; }
+    </style>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-600 mb-2">PSG Compass - Copedent Code Generator</h1>
+            <p class="text-gray-500">Generate copedent code for DefaultCopedents.js - Matches App Functionality EXACTLY</p>
+        </div>
+
+        <!-- Page 1: Basic Setup -->
+        <div id="page-1" class="page">
+            <fieldset class="fieldset">
+                <legend class="legend">Copedent Name</legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1 text-gray-700">Copedent Name</label>
+                        <input type="text" id="copedent-name" placeholder="e.g., E9 Standard" 
+                               class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend class="legend">Strings & Controls Matrix</legend>
+                <div class="overflow-x-auto">
+                    <table id="editor-table" class="min-w-full border-collapse border border-gray-300">
+                        <thead id="editor-thead" class="sticky-header"></thead>
+                        <tbody id="editor-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="mt-4 space-x-2">
+                    <button id="add-string" class="btn btn-blue">+ Add String</button>
+                    <button id="add-pedal" class="btn btn-blue">+ Add Pedal</button>
+                    <button id="remove-string" class="btn btn-red">- Remove Last String</button>
+                    <button id="remove-pedal" class="btn btn-red">- Remove Last Pedal</button>
+                </div>
+            </fieldset>
+            
+            <fieldset class="fieldset">
+                <legend class="legend">Active Knee Levers & Names</legend>
+                <div id="lever-toggles" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2"></div>
+            </fieldset>
+
+            <div class="text-center mt-8">
+                <button id="to-page-2" class="btn btn-green text-lg px-8 py-3">Next: Splits & Code Generation →</button>
+            </div>
+        </div>
+
+        <!-- Page 2: Splits & Code Output -->
+        <div id="page-2" class="page hidden">
+            <div class="flex justify-between items-center mb-6">
+                <button id="p2-back" class="btn btn-blue">← Back to Setup</button>
+                <h2 class="text-2xl font-bold text-gray-800">Splits & Code Generation</h2>
+                <div class="flex space-x-2">
+                    <button id="to-page-3" class="btn btn-orange">Custom Mechanisms</button>
+                </div>
+            </div>
+            
+            <fieldset class="fieldset">
+                <legend class="legend">Detected Splits Configuration</legend>
+                <div id="split-actions" class="mb-4 space-x-2"></div>
+                <div id="splits-container" class="space-y-2"></div>
+            </fieldset>
+            
+            <div id="output-section" class="space-y-6">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-800">Copedent Object Code</h3>
+                        <button id="copy-object-code" class="btn btn-blue text-sm">📋 Copy Object</button>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-2">Copy this raw copedent object:</p>
+                    <div class="relative border border-gray-300 rounded-lg">
+                        <pre><code id="output-code"></code></pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-800">Array Addition Code</h3>
+                        <button id="copy-array-code" class="btn btn-purple text-sm">📋 Copy Array Line</button>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-2">Add this line to the DEFAULT_COPEDENTS array:</p>
+                    <div class="relative border border-gray-300 rounded-lg">
+                        <pre><code id="array-code"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3: Custom Mechanisms -->
+        <div id="page-3" class="page hidden">
+            <div class="flex justify-between items-center mb-6">
+                <button id="p3-back" class="btn btn-blue">← Back</button>
+                <h2 class="text-2xl font-bold text-gray-800">Custom Mechanisms</h2>
+                <button id="to-page-4" class="btn btn-green">Next: Combinations →</button>
+            </div>
+            
+            <fieldset class="fieldset">
+                <legend class="legend">Define Mechanisms</legend>
+                <div class="overflow-x-auto">
+                    <table id="mechanisms-table" class="min-w-full border-collapse border border-gray-300">
+                        <thead id="mechanisms-thead" class="sticky-header"></thead>
+                        <tbody id="mechanisms-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="mt-4 space-x-2">
+                    <button id="add-mechanism" class="btn btn-blue">+ Add Mechanism</button>
+                    <button id="remove-mechanism" class="btn btn-red">- Remove Last Mechanism</button>
+                </div>
+            </fieldset>
+        </div>
+        
+        <!-- Page 4: Mechanism Combinations -->
+        <div id="page-4" class="page hidden">
+            <div class="flex justify-between items-center mb-6">
+                <button id="p4-back" class="btn btn-blue">← Back</button>
+                <h2 class="text-2xl font-bold text-gray-800">Mechanism Combinations</h2>
+                <button id="finish-mechanisms" class="btn btn-green">✓ Finish & Generate Code</button>
+            </div>
+            
+            <fieldset class="fieldset">
+                <legend class="legend">Combination Matrix</legend>
+                <p class="text-sm text-gray-600 mb-4">Select which controls each mechanism can combine with for splits:</p>
+                <div class="overflow-x-auto">
+                    <table id="combinations-table" class="min-w-full border-collapse border border-gray-300">
+                        <thead id="combinations-thead" class="sticky-header"></thead>
+                        <tbody id="combinations-tbody"></tbody>
+                    </table>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <script>
+        // === UTILITY FUNCTIONS (Exact match to app) ===
+        const CHROMATIC_SCALE_SHARPS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const ENHARMONIC_MAP = { 
+            'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#', 
+            'E#': 'F', 'B#': 'C', 'Fb': 'E', 'Cb': 'B' 
+        };
+
+        function isValidNote(note) { 
+            try { 
+                splitNote(note); 
+                return true; 
+            } catch { 
+                return false; 
+            } 
+        }
+
+        function splitNote(note) { 
+            const match = note.match(/^([A-G])([b#])?(\d+)$/); 
+            if (!match) throw new Error(`Invalid note: ${note}`); 
+            const [, letter, accidental, octaveStr] = match; 
+            return { baseNote: letter + (accidental || ''), octave: parseInt(octaveStr, 10) }; 
+        }
+
+        function normalizeNote(note) { 
+            const { baseNote, octave } = splitNote(note); 
+            const normalizedBase = ENHARMONIC_MAP[baseNote] || baseNote; 
+            return `${normalizedBase}${octave}`; 
+        }
+
+        function getNoteIndex(baseNote) { 
+            const normalizedBase = splitNote(normalizeNote(`${baseNote}4`)).baseNote; 
+            const index = CHROMATIC_SCALE_SHARPS.indexOf(normalizedBase); 
+            if (index === -1) throw new Error(`Invalid base note: ${baseNote}`); 
+            return index; 
+        }
+
+        function getNoteAtOffset(startNote, semitones) { 
+            try { 
+                const { baseNote, octave } = splitNote(normalizeNote(startNote)); 
+                const totalSemitones = getNoteIndex(baseNote) + (octave * 12) + semitones; 
+                let newIndex = totalSemitones % 12; 
+                if (newIndex < 0) newIndex += 12; 
+                return `${CHROMATIC_SCALE_SHARPS[newIndex]}${Math.floor(totalSemitones / 12)}`; 
+            } catch { 
+                return ''; 
+            } 
+        }
+
+        const getLeverProperties = (leverId) => { 
+            if (leverId.startsWith('V')) return { knee: 'Vertical', direction: null }; 
+            return { knee: leverId.charAt(0), direction: leverId.charAt(2) }; 
+        };
+
+        const isLeverCombinationValid = (leverIds) => { 
+            const l = new Set(), r = new Set(); 
+            for (const id of leverIds) { 
+                const p = getLeverProperties(id); 
+                if (p.knee === 'L') l.add(p.direction); 
+                else if (p.knee === 'R') r.add(p.direction); 
+            } 
+            if (l.has('L') && l.has('R')) return false; 
+            if (r.has('L') && r.has('R')) return false; 
+            return true; 
+        };
+
+        function canControlsSplit(a, b, mechanismCombinations) {
+            if (a.id === b.id) return false;
+            if (a.type === 'mechanism' || b.type === 'mechanism') {
+                const mec = a.type === 'mechanism' ? a : b;
+                const other = a.type === 'mechanism' ? b : a;
+                return mechanismCombinations[mec.id]?.includes(other.id) || false;
+            }
+            if (a.type === 'pedal' && b.type === 'pedal') return Math.abs(parseInt(a.id.substring(1)) - parseInt(b.id.substring(1))) === 1;
+            if (a.type === 'lever' && b.type === 'lever') return isLeverCombinationValid([a.id, b.id]);
+            return true;
+        }
+
+        function detectSplits(strings, pedals, kneeLevers, mechanisms, mechanismCombinations) {
+            const splits = [];
+            const activeLevers = kneeLevers.filter(l => l.active);
+            const allControls = [
+                ...pedals.map(p => ({...p, type: 'pedal'})), 
+                ...activeLevers.map(l => ({...l, type: 'lever'})),
+                ...mechanisms.map(m => ({...m, type: 'mechanism'}))
+            ];
+            
+            strings.forEach((str, strIndex) => {
+                const affectedBy = [];
+                allControls.forEach(control => {
+                    const semitones = control.changes[str.id];
+                    if (semitones) affectedBy.push({ ...control, change: semitones });
+                });
+                
+                if (affectedBy.length < 2) return;
+                
+                const uniquePairs = new Set();
+                for (let i = 0; i < affectedBy.length; i++) {
+                    for (let j = i + 1; j < affectedBy.length; j++) {
+                        const a = affectedBy[i], b = affectedBy[j];
+                        if (canControlsSplit(a, b, mechanismCombinations)) {
+                            const sortedIds = [a.id, b.id].sort();
+                            const key = `${str.id}-${sortedIds.join('_')}`;
+                            if (!uniquePairs.has(key)) {
+                                uniquePairs.add(key);
+                                splits.push({
+                                    stringId: str.id,
+                                    isMecSplit: a.type === 'mechanism' || b.type === 'mechanism',
+                                    conflictingControls: [a, b],
+                                    manualSemitoneChange: a.change + b.change,
+                                    isIncludedInCalculation: 'DEFINE'
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+            return splits;
+        }
+
+        // === MAIN APPLICATION ===
+        document.addEventListener('DOMContentLoaded', () => {
+            let state = {
+                strings: Array(10).fill('').map((_, i) => ({ id: i + 1, openNote: i < 3 ? ['B3', 'G#3', 'E3'][i] : 'A4' })),
+                pedals: [
+                    { id: 'P1', name: 'P1', changes: {} }, 
+                    { id: 'P2', name: 'P2', changes: {} }, 
+                    { id: 'P3', name: 'P3', changes: {} }
+                ],
+                levers: [
+                    'LKL', 'LKR', 'VL', 'RKL', 'RKR', 'VR', 
+                    'LKL2', 'LKR2', 'VL2', 'RKL2', 'RKR2', 'VR2'
+                ].map(id => ({ id, name: id, active: false, changes: {} })),
+                mechanisms: [],
+                mechanismCombinations: {}
+            };
+
+            const pages = {
+                '1': document.getElementById('page-1'), 
+                '2': document.getElementById('page-2'),
+                '3': document.getElementById('page-3'), 
+                '4': document.getElementById('page-4')
+            };
+
+            function switchPage(toPage) {
+                Object.values(pages).forEach(p => p.classList.add('hidden'));
+                pages[toPage].classList.remove('hidden');
+            }
+
+            function renderMainTable() {
+                const tableHead = document.getElementById('editor-thead');
+                const tableBody = document.getElementById('editor-tbody');
+                const activeLevers = state.levers.filter(l => l.active);
+
+                // Header
+                tableHead.innerHTML = `<tr class="bg-gray-50">
+                    <th class="p-2 border border-gray-300 sticky left-0 bg-gray-50 z-10 font-semibold text-gray-700">String</th>
+                    <th class="p-2 border border-gray-300 sticky left-20 bg-gray-50 z-10 font-semibold text-gray-700" style="left: 80px;">Open Note</th>
+                    ${state.pedals.map(p => `<th class="p-2 border border-gray-300 bg-gray-50">
+                        <input type="text" value="${p.name}" class="w-20 p-1 border rounded text-center font-medium control-name-input bg-white" data-type="pedal" data-id="${p.id}">
+                    </th>`).join('')}
+                    ${activeLevers.map(l => `<th class="p-2 border border-gray-300 bg-gray-50 font-semibold text-gray-700">${l.name}</th>`).join('')}
+                </tr>`;
+
+                // Body
+                tableBody.innerHTML = state.strings.map(str => `<tr>
+                    <td class="p-2 border border-gray-300 text-center font-semibold sticky left-0 bg-white z-10">S${str.id}</td>
+                    <td class="p-2 border border-gray-300 sticky bg-white z-10" style="left: 80px;">
+                        <div class="flex items-center">
+                            <input type="text" value="${str.openNote}" class="w-16 p-1 border rounded string-note text-center" data-string-id="${str.id}">
+                            <div class="flex flex-col ml-2 note-arrows text-xs">
+                                <button type="button" class="cursor-pointer hover:text-blue-600 leading-none note-adjust" data-action="up" data-string-id="${str.id}">▲</button>
+                                <button type="button" class="cursor-pointer hover:text-blue-600 leading-none note-adjust" data-action="down" data-string-id="${str.id}">▼</button>
+                            </div>
+                        </div>
+                    </td>
+                    ${state.pedals.map(p => {
+                        const change = p.changes[str.id] || '';
+                        const resultNote = isValidNote(str.openNote) && change ? getNoteAtOffset(str.openNote, change) : '';
+                        return `<td class="p-2 border border-gray-300 text-center ${change ? 'bg-orange-100' : ''}">
+                            <input type="number" value="${change}" class="control-input p-1 border rounded control-change" data-type="pedal" data-id="${p.id}" data-string-id="${str.id}">
+                            ${resultNote ? `<div class="note-result">(${resultNote})</div>` : ''}
+                        </td>`;
+                    }).join('')}
+                    ${activeLevers.map(l => {
+                        const change = l.changes[str.id] || '';
+                        const resultNote = isValidNote(str.openNote) && change ? getNoteAtOffset(str.openNote, change) : '';
+                        return `<td class="p-2 border border-gray-300 text-center ${change ? 'bg-orange-100' : ''}">
+                            <input type="number" value="${change}" class="control-input p-1 border rounded control-change" data-type="lever" data-id="${l.id}" data-string-id="${str.id}">
+                            ${resultNote ? `<div class="note-result">(${resultNote})</div>` : ''}
+                        </td>`;
+                    }).join('')}
+                </tr>`).join('');
+            }
+
+            function renderLeverToggles() {
+                const leverToggles = document.getElementById('lever-toggles');
+                leverToggles.innerHTML = state.levers.map(l => `
+                    <div class="lever-toggle-container border border-gray-300 rounded-md p-2">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="h-4 w-4 lever-toggle text-blue-600 focus:ring-blue-500" data-id="${l.id}" ${l.active ? 'checked' : ''}>
+                            <span class="ml-2 font-bold text-gray-700">${l.id}</span>
+                        </label>
+                        <input type="text" value="${l.name}" class="w-20 mt-1 p-1 border rounded text-center text-sm control-name-input" data-type="lever" data-id="${l.id}">
+                    </div>
+                `).join('');
+            }
+
+            function renderMechanismsTable() {
+                const tableHead = document.getElementById('mechanisms-thead');
+                const tableBody = document.getElementById('mechanisms-tbody');
+
+                tableHead.innerHTML = `<tr class="bg-gray-50">
+                    <th class="p-2 border border-gray-300 sticky left-0 bg-gray-50 z-10 font-semibold text-gray-700">Mech</th>
+                    <th class="p-2 border border-gray-300 sticky left-20 bg-gray-50 z-10 font-semibold text-gray-700" style="left: 80px;">Name</th>
+                    ${state.strings.map(str => `<th class="p-2 border border-gray-300 bg-gray-50 font-semibold text-gray-700">S${str.id}</th>`).join('')}
+                </tr>`;
+
+                tableBody.innerHTML = state.mechanisms.map(mec => `<tr>
+                    <td class="p-2 border border-gray-300 text-center font-semibold sticky left-0 bg-white z-10">${mec.id}</td>
+                    <td class="p-2 border border-gray-300 sticky bg-white z-10" style="left: 80px;">
+                        <input type="text" value="${mec.name}" class="w-16 p-1 border rounded text-center control-name-input" data-type="mechanism" data-id="${mec.id}">
+                    </td>
+                    ${state.strings.map(str => {
+                        const change = mec.changes[str.id] || '';
+                        const resultNote = isValidNote(str.openNote) && change ? getNoteAtOffset(str.openNote, change) : '';
+                        return `<td class="p-2 border border-gray-300 text-center ${change ? 'bg-orange-100' : ''}">
+                            <input type="number" value="${change}" class="control-input p-1 border rounded control-change" data-type="mechanism" data-id="${mec.id}" data-string-id="${str.id}">
+                            ${resultNote ? `<div class="note-result">(${resultNote})</div>` : ''}
+                        </td>`;
+                    }).join('')}
+                </tr>`).join('');
+            }
+
+            function renderCombinationsTable() {
+                const tableHead = document.getElementById('combinations-thead');
+                const tableBody = document.getElementById('combinations-tbody');
+                const allModifiers = [...state.pedals, ...state.levers.filter(l => l.active), ...state.mechanisms];
+
+                tableHead.innerHTML = `<tr class="bg-gray-50">
+                    <th class="p-2 border border-gray-300 sticky left-0 bg-gray-50 z-10 font-semibold text-gray-700">Mechanism</th>
+                    ${allModifiers.map(mod => `<th class="p-2 border border-gray-300 bg-gray-50 text-center font-semibold text-gray-700 text-xs transform -rotate-45 h-20 w-16">${mod.name}</th>`).join('')}
+                </tr>`;
+
+                tableBody.innerHTML = state.mechanisms.map(mec => `<tr>
+                    <td class="p-2 border border-gray-300 font-semibold sticky left-0 bg-white z-10">${mec.name}</td>
+                    ${allModifiers.map(mod => {
+                        const isChecked = state.mechanismCombinations[mec.id]?.includes(mod.id) || false;
+                        const isDisabled = mec.id === mod.id;
+                        return `<td class="p-2 border border-gray-300 text-center">
+                            <input type="checkbox" class="h-4 w-4 combination-checkbox text-blue-600 focus:ring-blue-500" 
+                                   data-mec-id="${mec.id}" data-modifier-id="${mod.id}" 
+                                   ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                        </td>`;
+                    }).join('')}
+                </tr>`).join('');
+            }
+
+            function recalculateAndRenderSplits() {
+                const detected = detectSplits(state.strings, state.pedals, state.levers, state.mechanisms, state.mechanismCombinations);
+                const splitsContainer = document.getElementById('splits-container');
+                const splitActions = document.getElementById('split-actions');
+                
+                if (detected.length === 0) { 
+                    splitsContainer.innerHTML = '<p class="text-gray-500 text-center p-4">No splits detected with current configuration.</p>'; 
+                    splitActions.innerHTML = ''; 
+                    return; 
+                }
+                
+                splitActions.innerHTML = `
+                    <button class="btn btn-blue text-sm" data-action="include-all">✓ Include All</button>
+                    <button class="btn btn-gray text-sm" data-action="exclude-all">✗ Exclude All</button>
+                `;
+                
+                splitsContainer.innerHTML = detected.map((split, index) => `
+                    <div class="split-group grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 border rounded-lg ${split.isMecSplit ? 'split-mec' : 'bg-gray-50'}" data-index="${index}">
+                        <div class="font-mono text-sm font-semibold">String ${split.stringId}</div>
+                        <div class="font-mono text-sm">${split.conflictingControls.map(c => c.name).join(' + ')}</div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-600 mr-2">Semitones:</span>
+                            <input type="number" class="split-semitones p-1 border rounded text-center w-16" value="${split.manualSemitoneChange}">
+                        </div>
+                        <select class="split-inclusion p-2 border rounded text-sm ${split.isIncludedInCalculation === 'DEFINE' ? 'split-define' : ''}" data-original-value="${split.isIncludedInCalculation}">
+                            <option value="DEFINE" class="define-option">🚨 DEFINE</option>
+                            <option value="include">✓ Include</option>
+                            <option value="exclude">✗ Exclude</option>
+                        </select>
+                    </div>
+                `).join('');
+                
+                // Set selected values
+                splitsContainer.querySelectorAll('.split-inclusion').forEach(select => {
+                    select.value = select.dataset.originalValue;
+                });
+            }
+
+            function generateCode() {
+                const name = document.getElementById('copedent-name').value || 'My Copedent';
+                const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+                
+                // Process splits
+                const definedSplits = [];
+                const detectedForCode = detectSplits(state.strings, state.pedals, state.levers, state.mechanisms, state.mechanismCombinations);
+                document.querySelectorAll('.split-group').forEach(group => {
+                    const index = group.dataset.index;
+                    const splitData = detectedForCode[index];
+                    const inclusion = group.querySelector('.split-inclusion').value;
+                    const semitones = parseInt(group.querySelector('.split-semitones').value, 10);
+                    if (inclusion === 'DEFINE') return;
+                    definedSplits.push({ 
+                        stringId: splitData.stringId, 
+                        conflictingControlIds: splitData.conflictingControls.map(c => c.id), 
+                        manualSemitoneChange: isNaN(semitones) ? 0 : semitones, 
+                        isIncludedInCalculation: inclusion
+                    });
+                });
+                
+                // Generate object code
+                const validStrings = state.strings.filter(s => s.openNote && s.openNote !== '');
+                let objectCode = `const raw_${id} = {\n`;
+                objectCode += `  id: 'default-${id}',\n`;
+                objectCode += `  name: '${name}',\n`;
+                objectCode += `  mechanisms: [\n`;
+                if (state.mechanisms.length > 0) {
+                    objectCode += state.mechanisms.map(m => {
+                        const changesStr = Object.entries(m.changes).map(([k, v]) => `${k}: ${v}`).join(', ');
+                        return `    { id: '${m.id}', name: '${m.name}', changes: { ${changesStr} } }`;
+                    }).join(',\n') + '\n';
+                }
+                objectCode += `  ],\n`;
+                objectCode += `  mechanismCombinations: {\n`;
+                const combos = Object.entries(state.mechanismCombinations).map(([k, v]) => 
+                    `    ${k}: [${v.map(i => `'${i}'`).join(', ')}]`
+                ).join(',\n');
+                if (combos) objectCode += combos + '\n';
+                objectCode += `  },\n`;
+                objectCode += `  strings: [${validStrings.map(s => `'${s.openNote}'`).join(', ')}],\n`;
+                objectCode += `  pedals: [\n`;
+                objectCode += state.pedals.map(p => {
+                    const changesStr = Object.entries(p.changes).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    return `    { id: '${p.id}', name: '${p.name}', changes: { ${changesStr} } }`;
+                }).join(',\n');
+                objectCode += `\n  ],\n`;
+                objectCode += `  kneeLevers: [\n`;
+                objectCode += state.levers.map(l => {
+                    const changesStr = Object.entries(l.changes).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    return `    { id: '${l.id}', name: '${l.name}', active: ${l.active}, changes: { ${changesStr} } }`;
+                }).join(',\n');
+                objectCode += `\n  ],\n`;
+                objectCode += `  splits: [\n`;
+                if (definedSplits.length > 0) {
+                    objectCode += definedSplits.map(s => 
+                        `    { stringId: ${s.stringId}, conflictingControlIds: [${s.conflictingControlIds.map(c => `'${c}'`).join(', ')}], manualSemitoneChange: ${s.manualSemitoneChange}, isIncludedInCalculation: '${s.isIncludedInCalculation}' }`
+                    ).join(',\n') + '\n';
+                }
+                objectCode += `  ]\n`;
+                objectCode += `};`;
+                
+                // Generate array addition code
+                const arrayCode = `createCopedentObject(raw_${id}),`;
+                
+                document.getElementById('output-code').textContent = objectCode;
+                document.getElementById('array-code').textContent = arrayCode;
+            }
+
+            // === EVENT HANDLERS ===
+            
+            // String note changes
+            document.addEventListener('input', (e) => {
+                if (e.target.classList.contains('string-note')) {
+                    let value = e.target.value.replace(/[^A-Ga-g#b0-9]/g, '');
+                    if (value.length > 0) value = value.charAt(0).toUpperCase() + value.slice(1);
+                    e.target.value = value;
+                    const stringId = parseInt(e.target.dataset.stringId);
+                    const string = state.strings.find(s => s.id === stringId);
+                    if (string) {
+                        string.openNote = value;
+                        renderMainTable();
+                        if (state.mechanisms.length > 0) renderMechanismsTable();
+                    }
+                }
+            });
+
+            // Control name changes
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('control-name-input')) {
+                    const { type, id } = e.target.dataset;
+                    const controlArray = type === 'pedal' ? state.pedals : (type === 'lever' ? state.levers : state.mechanisms);
+                    const control = controlArray.find(c => c.id === id);
+                    if (control) {
+                        control.name = e.target.value;
+                        if (type === 'lever' || type === 'pedal') renderMainTable();
+                        else if (type === 'mechanism') renderMechanismsTable();
+                    }
+                } else if (e.target.classList.contains('control-change')) {
+                    const { type, id, stringId } = e.target.dataset;
+                    const controlArray = type === 'pedal' ? state.pedals : (type === 'lever' ? state.levers : state.mechanisms);
+                    const control = controlArray.find(c => c.id === id);
+                    const val = parseInt(e.target.value, 10);
+                    if (isNaN(val) || val === 0) delete control.changes[stringId];
+                    else control.changes[stringId] = val;
+                    if (type === 'lever' || type === 'pedal') renderMainTable();
+                    else if (type === 'mechanism') renderMechanismsTable();
+                } else if (e.target.classList.contains('lever-toggle')) {
+                    const lever = state.levers.find(l => l.id === e.target.dataset.id);
+                    lever.active = e.target.checked;
+                    renderMainTable();
+                }
+            });
+
+            // Note adjustment arrows
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('note-adjust')) {
+                    const stringId = parseInt(e.target.dataset.stringId);
+                    const action = e.target.dataset.action;
+                    const string = state.strings.find(s => s.id === stringId);
+                    if (string && isValidNote(string.openNote)) {
+                        const newNote = getNoteAtOffset(string.openNote, action === 'up' ? 1 : -1);
+                        string.openNote = newNote;
+                        renderMainTable();
+                        if (state.mechanisms.length > 0) renderMechanismsTable();
+                    }
+                }
+            });
+
+            // Button handlers
+            document.getElementById('add-string').addEventListener('click', () => {
+                if (state.strings.length >= 20) return alert('Maximum of 20 strings reached.');
+                const newId = Math.max(...state.strings.map(s => s.id)) + 1;
+                state.strings.push({ id: newId, openNote: 'A4' });
+                renderMainTable();
+                if (state.mechanisms.length > 0) renderMechanismsTable();
+            });
+
+            document.getElementById('remove-string').addEventListener('click', () => {
+                if (state.strings.length > 1) {
+                    state.strings.pop();
+                    renderMainTable();
+                    if (state.mechanisms.length > 0) renderMechanismsTable();
+                }
+            });
+
+            document.getElementById('add-pedal').addEventListener('click', () => {
+                const id = `P${state.pedals.length + 1}`;
+                state.pedals.push({ id: id, name: id, changes: {} });
+                renderMainTable();
+            });
+
+            document.getElementById('remove-pedal').addEventListener('click', () => {
+                if (state.pedals.length > 1) {
+                    state.pedals.pop();
+                    renderMainTable();
+                }
+            });
+
+            document.getElementById('add-mechanism').addEventListener('click', () => {
+                const id = `M${state.mechanisms.length + 1}`;
+                state.mechanisms.push({ id: id, name: id, changes: {} });
+                renderMechanismsTable();
+            });
+
+            document.getElementById('remove-mechanism').addEventListener('click', () => {
+                if (state.mechanisms.length > 0) {
+                    state.mechanisms.pop();
+                    renderMechanismsTable();
+                }
+            });
+
+            // Combinations table
+            document.getElementById('combinations-table').addEventListener('change', (e) => {
+                if (e.target.classList.contains('combination-checkbox')) {
+                    const { mecId, modifierId } = e.target.dataset;
+                    const isChecked = e.target.checked;
+
+                    if (!state.mechanismCombinations[mecId]) state.mechanismCombinations[mecId] = [];
+                    
+                    if (isChecked) {
+                        if (!state.mechanismCombinations[mecId].includes(modifierId)) {
+                            state.mechanismCombinations[mecId].push(modifierId);
+                        }
+                    } else {
+                        state.mechanismCombinations[mecId] = state.mechanismCombinations[mecId].filter(id => id !== modifierId);
+                    }
+                    
+                    if (modifierId.startsWith('M')) {
+                        if (!state.mechanismCombinations[modifierId]) state.mechanismCombinations[modifierId] = [];
+                        if (isChecked) {
+                            if (!state.mechanismCombinations[modifierId].includes(mecId)) {
+                                state.mechanismCombinations[modifierId].push(mecId);
+                            }
+                        } else {
+                            state.mechanismCombinations[modifierId] = state.mechanismCombinations[modifierId].filter(id => id !== mecId);
+                        }
+                        renderCombinationsTable();
+                    }
+                }
+            });
+
+            // Page navigation
+            document.getElementById('to-page-2').addEventListener('click', () => {
+                recalculateAndRenderSplits();
+                generateCode();
+                switchPage('2');
+            });
+            document.getElementById('p2-back').addEventListener('click', () => switchPage('1'));
+            document.getElementById('to-page-3').addEventListener('click', () => {
+                renderMechanismsTable();
+                switchPage('3');
+            });
+            document.getElementById('p3-back').addEventListener('click', () => switchPage('2'));
+            document.getElementById('to-page-4').addEventListener('click', () => {
+                renderCombinationsTable();
+                switchPage('4');
+            });
+            document.getElementById('p4-back').addEventListener('click', () => switchPage('3'));
+            document.getElementById('finish-mechanisms').addEventListener('click', () => {
+                recalculateAndRenderSplits();
+                generateCode();
+                switchPage('2');
+            });
+
+            // Copy buttons
+            document.getElementById('copy-object-code').addEventListener('click', () => {
+                navigator.clipboard.writeText(document.getElementById('output-code').textContent).then(() => {
+                    alert('Object code copied to clipboard!');
+                });
+            });
+            
+            document.getElementById('copy-array-code').addEventListener('click', () => {
+                navigator.clipboard.writeText(document.getElementById('array-code').textContent).then(() => {
+                    alert('Array line copied to clipboard!');
+                });
+            });
+
+            // Split actions
+            document.getElementById('split-actions').addEventListener('click', (e) => {
+                const action = e.target.dataset.action;
+                if (action) {
+                    const value = action === 'include-all' ? 'include' : 'exclude';
+                    document.querySelectorAll('.split-inclusion').forEach(select => {
+                        select.value = value;
+                        select.classList.remove('split-define');
+                    });
+                    generateCode();
+                }
+            });
+
+            document.getElementById('splits-container').addEventListener('change', () => {
+                generateCode();
+            });
+
+            // Initialize
+            renderMainTable();
+            renderLeverToggles();
+        });
+    </script>
+</body>
+</html>
